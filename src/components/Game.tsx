@@ -11,6 +11,9 @@ import { checkEatsFood } from '../utils/checkEatsFood';
 import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
 import { randomFoodPosition } from '../utils/randomFoodPosition';
 
+import { database } from '../config/Config'; 
+import { ref, set } from 'firebase/database';
+
 const SNAKE_INITIAL_POSITION=[{x:5, y:5}];
 const FOOD_INITIAL_POSITION = {x:5, y:20};
 const GAME_BOUNDS = {xMin:0, xMax: 35, yMin:0, yMax: 63};
@@ -68,6 +71,8 @@ export default function Game(): JSX.Element {
             setFood(randomFoodPosition(GAME_BOUNDS.xMax, GAME_BOUNDS.yMax))
             setSnake([newHead, ...snake]);
             setScore(score + SCORE_INCREMENT);
+
+            saveScoreToDatabase(newScore);
             
         }else{
             setSnake ([newHead, ...snake.slice(0,-1)])// mover la snake
@@ -107,6 +112,16 @@ export default function Game(): JSX.Element {
         setDirection(Direction.Right);
         setIsPaused(false);
       };
+
+      const saveScoreToDatabase = (score: number) => {
+        const userId = 'user1'; // usuario de la
+        set(ref(database, 'scores/' + userId), {
+          score: score,
+          timestamp: Date.now()
+        });
+      };
+
+
     return (
         <GestureHandlerRootView  >
             <PanGestureHandler onGestureEvent= {handleGesture}>
