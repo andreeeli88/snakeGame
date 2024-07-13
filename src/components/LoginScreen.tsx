@@ -2,26 +2,33 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-nativ
 import React, { useState } from 'react';
 
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from '../config/Config';
 import RegistroScreen from './RegistroScreen';
 
-export default function LoginScreen({navigation}: any) {
+import { getAuth } from 'firebase/auth';
+export default function LoginScreen({ navigation }: any) {
 
-    const [correo, setcorreo] = useState('')
-    const [contrasenia, setcontrasenia] = useState('')
+    const [correo, setCorreo] = useState('')
+    const [contrasenia, setContrasenia] = useState('')
+
+    const auth = getAuth();
 
     function login() {
         signInWithEmailAndPassword(auth, correo, contrasenia)
             .then((userCredential) => {
                 const user = userCredential.user;
-                navigation.navigate("Game")
+                if (user) {
+                    navigation.navigate("Game", { username: user.displayName });
+                } else {
+                    console.error("No se encontró el nombre de usuario en el objeto user.");
+                }
             })
             .catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;
                 console.error(errorCode, errorMessage);
             });
-        } 
+    }
+    
 
     return (
         <View style={styles.container}>
@@ -30,14 +37,14 @@ export default function LoginScreen({navigation}: any) {
                 style={styles.input}
                 placeholder='Ingresar email'
                 keyboardType='email-address'
-                onChangeText={(texto: any) => setcorreo(texto)}
+                onChangeText={(texto: any) => setCorreo(texto)}
                 value={correo}
             />
             <TextInput
                 style={styles.input}
                 placeholder='Ingresar contraseña'
                 secureTextEntry
-                onChangeText={(texto: any) => setcontrasenia(texto)}
+                onChangeText={(texto: any) => setContrasenia(texto)}
                 value={contrasenia}
             />
             <TouchableOpacity style={styles.button} onPress={login}>
@@ -53,8 +60,8 @@ export default function LoginScreen({navigation}: any) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center', 
-        alignItems: 'center', 
+        justifyContent: 'center',
+        alignItems: 'center',
         padding: 20,
         backgroundColor: '#FFB6C1',
     },
@@ -87,4 +94,4 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
     },
-})
+});
